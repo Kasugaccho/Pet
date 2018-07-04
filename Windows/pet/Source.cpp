@@ -8,13 +8,13 @@ struct Pet {
 	//‘Ì—Í
 	float hp = 100;
 	//‰j‚®‘¬‚³
-	Pos2R speed = { 0.8f,0.8f };
+	Pos2F speed = { 0.6f,0.6f };
 	//–Ú“I‘ÎÛ‚Æ‚Ì‹——£
 	float dis = 0.0f;
 
 	Pet() = default;
 	const Pet(const AnimeMainData* const add_tmd, const uint8_t add_alpha, const Pos4& add_pos4, const float hp_) :ui(add_tmd, add_alpha, add_pos4), hp(hp_) {}
-	const Pet(const AnimeMainData* const add_tmd, const uint8_t add_alpha, const PosA4R& add_pos4, const float hp_) : ui(add_tmd, add_alpha, add_pos4), hp(hp_) {}
+	const Pet(const AnimeMainData* const add_tmd, const uint8_t add_alpha, const PosA4F& add_pos4, const float hp_) : ui(add_tmd, add_alpha, add_pos4), hp(hp_) {}
 	//const Pet& tmd(const AnimeMainData* const add_tmd) { ui. = add_tmd; }
 
 	Pet& move(std::vector<AnimeUI>& food)
@@ -22,21 +22,22 @@ struct Pet {
 		//‰a‚ª‚ ‚é‚©’²‚×A‚à‚µ‰a‚ª‚ ‚Á‚½‚çÅ¬‹——£‚Ì‰a‚ÖˆÚ“®‚·‚é
 		size_t dis_id = 0;
 		if (searchMin(food, this->ui.PosF(), dis_id, &this->dis) == -1) {
-			this->ui.addPosF(Pos2R(speed.Hypot()*sin(ui.Rota()), -speed.Hypot()*cos(ui.Rota())));
+			this->ui.addPosF(speed.moveHypot(ui.Rota()));
 			this->ui.setPosF(asWindowSizeF());
 			return *this;
 		}
-		const Pos2R p(((food[dis_id].PosF().x < this->ui.PosF().x) ? this->speed.x*(-1) : this->speed.x), ((food[dis_id].PosF().y < this->ui.PosF().y) ? this->speed.y*(-1) : this->speed.y));
+		const Pos2F p(((food[dis_id].PosF().x < this->ui.PosF().x) ? this->speed.x*(-1) : this->speed.x), ((food[dis_id].PosF().y < this->ui.PosF().y) ? this->speed.y*(-1) : this->speed.y));
 		//‰a‚Ì•ûŒü‚ÉŒü‚©‚Á‚ÄˆÚ“®‚·‚é
-		this->ui.setRota(atan2(p.x, -p.y), 0.025f);
-		this->ui.addPosF(Pos2R(speed.Hypot()*sin(ui.Rota()), -speed.Hypot()*cos(ui.Rota())));
+		this->ui.setRota(atan2(p.x,-p.y), 0.025f);
+		this->ui.addPosF(speed.moveHypot(ui.Rota()));
 		this->ui.setPosF(asWindowSizeF());
 
 		//‰a‚ğH‚×‚é
-		if (this->dis < 18.8f) {
+		if (this->dis < ((ui.PosF().h > ui.PosF().w) ? ui.PosF().w / 6.0f : ui.PosF().h / 6.0f)) {
 			food.erase(food.begin() + dis_id);
 			if (this->hp > 100.0f) this->hp += 5.0f;
 		}
+
 		return *this;
 	}
 };
@@ -51,7 +52,7 @@ int32_t asMain()
 	const AnimeMainData foodA(1, asLoadTex(u8"P/Pet/food.png", 1));
 	const AnimeMainData twitterA(1, asLoadTex(u8"P/SNS/twitter.png", 1));
 
-	PosA4R p_a4(100.0f, 100.0f, 100.0f, 100.0f);
+	PosA4F p_a4(600.0f, 100.0f, 100.0f, 100.0f);
 	//asReadPos(u8"Save/pet0.txt", p_a4);
 
 	//ƒyƒbƒg
@@ -77,7 +78,7 @@ int32_t asMain()
 		//ƒ^ƒbƒ`‚³‚ê‚½‚ç‰a‚ğo‚·
 		if (as.isUp()) {
 			food.emplace_back();
-			food[food.size() - 1].setUI(&foodA, 100, PosA4R(float(asRand32(asWindowSize().x)), 0.0f, 30.0f, 30.0f));
+			food[food.size() - 1].setUI(&foodA, 100, PosA4F(float(asRand32(asWindowSize().x)), 0.0f, 30.0f, 30.0f));
 		}
 
 		//if (twitterUI.draw().update().Up()) {
